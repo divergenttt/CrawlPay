@@ -5,14 +5,16 @@ import { savePayment } from "@/lib/supabase";
 export async function GET(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") || "";
 
-  console.log("Request received, User-Agent:", userAgent);
-  console.log("Is bot:", isAIBot(userAgent));
-
   if (!isAIBot(userAgent)) {
     return NextResponse.json({ message: "Welcome human!", free: true });
   }
 
   const botName = getBotName(userAgent);
+
+  const fakeHash = "0x" + Array.from(
+    { length: 64 },
+    () => Math.floor(Math.random() * 16).toString(16)
+  ).join("");
 
   try {
     await savePayment({
@@ -20,21 +22,17 @@ export async function GET(req: NextRequest) {
       user_agent: userAgent,
       page_url: "/",
       amount_usdc: 0.001,
-      tx_hash: "test-" + Date.now(),
+      tx_hash: fakeHash,
     });
 
     return NextResponse.json({
       message: "Access granted",
       bot: botName,
       paid: 0.001,
+      tx_hash: fakeHash,
     });
   } catch (err) {
-    console.error("Full error:", JSON.stringify(err, null, 2));
-    console.error(
-      "Error message:",
-      err instanceof Error ? err.message : String(err)
-    );
-    console.error("Error stack:", err instanceof Error ? err.stack : "");
+    console.error("Error:", err instanceof Error ? err.message : String(err));
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

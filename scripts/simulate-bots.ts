@@ -31,7 +31,7 @@ async function main() {
     const botName = userAgent.split("/")[0];
 
     try {
-      await client.pay("http://localhost:3001/api/page", {
+      await client.pay("http://localhost:3000/api/page", {
         method: "GET",
         headers: { "User-Agent": userAgent },
       });

@@ -8,25 +8,114 @@ import type { CSSProperties } from "react";
 const RevenueChart = nextDynamic(() => import("@/components/revenue-chart"), {
   ssr: false,
   loading: () => (
-    <div style={{ height: "300px", background: "#1F2937", borderRadius: "0.75rem" }} />
+    <div style={{ height: "300px", background: "rgba(255,255,255,0.03)", borderRadius: "16px" }} />
   ),
 });
 
-const pageStyle: CSSProperties = { minHeight: "100vh", background: "#111827", color: "white", padding: "2rem" };
-const cardStyle: CSSProperties = { background: "#1F2937", borderRadius: "0.75rem", padding: "1.5rem" };
-const gridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "1rem", marginBottom: "2rem" };
-const sectionStyle: CSSProperties = { ...cardStyle, marginBottom: "2rem" };
-const tableContainerStyle: CSSProperties = { background: "#1F2937", borderRadius: "0.75rem", padding: "1.5rem" };
-const titleStyle: CSSProperties = { fontSize: "1.875rem", fontWeight: 700, marginBottom: "0.5rem", marginTop: 0 };
-const subtitleStyle: CSSProperties = { color: "#9CA3AF", marginBottom: "2rem", marginTop: 0 };
-const sectionTitleStyle: CSSProperties = { fontSize: "1.25rem", fontWeight: 700, marginBottom: "1rem", marginTop: 0 };
-const cardLabelStyle: CSSProperties = { color: "#9CA3AF", fontSize: "0.875rem", marginBottom: "0.5rem", marginTop: 0 };
-const cardValueStyle: CSSProperties = { fontSize: "1.5rem", fontWeight: 700, margin: 0 };
-const tableStyle: CSSProperties = { width: "100%", textAlign: "left", fontSize: "0.875rem", borderCollapse: "collapse" };
-const thStyle: CSSProperties = { color: "#9CA3AF", paddingBottom: "0.75rem", fontWeight: 500, textAlign: "left" };
-const rowStyle: CSSProperties = { borderTop: "1px solid #374151" };
-const tdStyle: CSSProperties = { padding: "1rem 0", verticalAlign: "middle" };
-const emptyCellStyle: CSSProperties = { ...tdStyle, textAlign: "center", color: "#6B7280", padding: "2rem 0" };
+const pageStyle: CSSProperties = {
+  minHeight: "100vh",
+  background: "linear-gradient(135deg, #1a1a2e 0%, #2d2d3a 50%, #1a1a2e 100%)",
+  color: "white",
+  padding: "2rem",
+  fontFamily: "system-ui, sans-serif",
+};
+
+const cardStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  borderRadius: "16px",
+  padding: "1.5rem",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+const gridStyle: CSSProperties = {
+  display: "grid",
+  gridTemplateColumns: "repeat(4, 1fr)",
+  gap: "1rem",
+  marginBottom: "1.5rem",
+};
+
+const sectionStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  borderRadius: "16px",
+  padding: "1.5rem",
+  border: "1px solid rgba(255,255,255,0.08)",
+  marginBottom: "1.5rem",
+};
+
+const tableContainerStyle: CSSProperties = {
+  background: "rgba(255,255,255,0.05)",
+  borderRadius: "16px",
+  padding: "1.5rem",
+  border: "1px solid rgba(255,255,255,0.08)",
+};
+
+const titleStyle: CSSProperties = {
+  fontSize: "1.875rem",
+  fontWeight: 700,
+  marginBottom: 0,
+  marginTop: 0,
+  letterSpacing: "-0.02em",
+};
+
+const sectionTitleStyle: CSSProperties = {
+  fontSize: "1rem",
+  fontWeight: 600,
+  marginBottom: "1rem",
+  marginTop: 0,
+  color: "rgba(255,255,255,0.7)",
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+};
+
+const cardLabelStyle: CSSProperties = {
+  color: "rgba(255,255,255,0.4)",
+  fontSize: "0.75rem",
+  marginBottom: "0.5rem",
+  marginTop: 0,
+  textTransform: "uppercase",
+  letterSpacing: "0.06em",
+  fontWeight: 500,
+};
+
+const cardValueStyle: CSSProperties = {
+  fontSize: "1.75rem",
+  fontWeight: 700,
+  margin: 0,
+  letterSpacing: "-0.02em",
+};
+
+const tableStyle: CSSProperties = {
+  width: "100%",
+  textAlign: "left",
+  fontSize: "0.875rem",
+  borderCollapse: "collapse",
+};
+
+const thStyle: CSSProperties = {
+  color: "rgba(255,255,255,0.3)",
+  paddingBottom: "0.75rem",
+  fontWeight: 500,
+  textAlign: "left",
+  textTransform: "uppercase",
+  fontSize: "0.7rem",
+  letterSpacing: "0.08em",
+};
+
+const rowStyle: CSSProperties = {
+  borderTop: "1px solid rgba(255,255,255,0.06)",
+};
+
+const tdStyle: CSSProperties = {
+  padding: "0.875rem 0",
+  verticalAlign: "middle",
+};
+
+const emptyCellStyle: CSSProperties = {
+  ...tdStyle,
+  textAlign: "center",
+  color: "rgba(255,255,255,0.3)",
+  padding: "3rem 0",
+};
 
 function toNumber(value: number | string | null | undefined): number {
   if (value == null) return 0;
@@ -84,7 +173,7 @@ export default function DashboardPage() {
 
   async function fetchData() {
     try {
-      const res = await fetch(`/api/payments?t=${Date.now()}`, { 
+      const res = await fetch(`/api/payments?t=${Date.now()}`, {
         cache: "no-store",
         headers: { "Cache-Control": "no-cache" }
       });
@@ -124,23 +213,50 @@ export default function DashboardPage() {
 
   return (
     <main style={pageStyle}>
-      <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "0.5rem" }}>
-        <h1 style={{ ...titleStyle, marginBottom: 0 }}>CrawlPay Dashboard</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981", animation: "pulse 2s infinite" }} />
-          <span style={{ fontSize: "0.75rem", color: "#10B981", fontWeight: 500 }}>LIVE</span>
-        </div>
-      </div>
-      <p style={subtitleStyle}>
-      Real-time AI crawler payments on Arc Testnet · {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Connecting..."}
-      </p>
-
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
 
+      {/* Навигация */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        marginBottom: "2rem",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h1 style={titleStyle}>CrawlPay Dashboard</h1>
+              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#10B981", animation: "pulse 2s infinite" }} />
+                <span style={{ fontSize: "0.7rem", color: "#10B981", fontWeight: 600, letterSpacing: "0.05em" }}>LIVE</span>
+              </div>
+            </div>
+            <p style={{ margin: 0, fontSize: "0.8rem", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
+              Arc Testnet · {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Connecting..."}
+            </p>
+          </div>
+        </div>
+        <a href="/" style={{
+          background: "rgba(255,255,255,0.06)",
+          color: "rgba(255,255,255,0.6)",
+          padding: "0.5rem 1rem",
+          borderRadius: "10px",
+          textDecoration: "none",
+          fontSize: "0.85rem",
+          border: "1px solid rgba(255,255,255,0.1)",
+          fontWeight: 500,
+        }}>
+          ← Home
+        </a>
+      </div>
+
       {loading ? (
-        <div style={{ color: "#9CA3AF", textAlign: "center", padding: "4rem" }}>Loading...</div>
+        <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", padding: "6rem", fontSize: "0.9rem" }}>
+          Loading...
+        </div>
       ) : (
         <>
+          {/* Карточки */}
           <div style={gridStyle}>
             {stats.map((stat) => (
               <div key={stat.label} style={cardStyle}>
@@ -150,11 +266,13 @@ export default function DashboardPage() {
             ))}
           </div>
 
+          {/* График */}
           <section style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Revenue (last 7 days)</h2>
+            <h2 style={sectionTitleStyle}>Revenue — last 7 days</h2>
             <RevenueChart data={chartData} />
           </section>
 
+          {/* Таблица */}
           <section style={tableContainerStyle}>
             <h2 style={sectionTitleStyle}>Recent Payments</h2>
             <div style={{ overflowX: "auto" }}>
@@ -171,16 +289,24 @@ export default function DashboardPage() {
                 <tbody>
                   {recent.length === 0 ? (
                     <tr style={rowStyle}>
-                      <td colSpan={5} style={emptyCellStyle}>No payments yet. Run simulate-bots.ts to test.</td>
+                      <td colSpan={5} style={emptyCellStyle}>
+                        No payments yet. Run simulate-bots.ts to test.
+                      </td>
                     </tr>
                   ) : (
                     recent.map((p) => (
                       <tr key={p.id} style={rowStyle}>
-                        <td style={{ ...tdStyle, fontWeight: 500 }}>{p.bot_name}</td>
-                        <td style={{ ...tdStyle, color: "#D1D5DB" }}>{p.page_url}</td>
-                        <td style={{ ...tdStyle, color: "#60A5FA" }}>{toNumber(p.amount_usdc).toFixed(3)} USDC</td>
-                        <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "0.75rem", color: "#9CA3AF" }}>{formatTxHash(p.tx_hash)}</td>
-                        <td style={{ ...tdStyle, color: "#9CA3AF" }}>{formatRelativeTime(p.created_at)}</td>
+                        <td style={{ ...tdStyle, fontWeight: 600 }}>{p.bot_name}</td>
+                        <td style={{ ...tdStyle, color: "rgba(255,255,255,0.4)", fontFamily: "monospace", fontSize: "0.8rem" }}>{p.page_url}</td>
+                        <td style={{ ...tdStyle, color: "#60A5FA", fontWeight: 500 }}>{toNumber(p.amount_usdc).toFixed(3)} USDC</td>
+                        <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "0.75rem" }}>
+  {p.tx_hash && p.tx_hash.startsWith("0x") ? (
+    <a href={`https://testnet.arcscan.app/tx/${p.tx_hash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#60A5FA", textDecoration: "none" }}>{formatTxHash(p.tx_hash)}</a>
+  ) : (
+    <span style={{ color: "rgba(255,255,255,0.3)" }}>{formatTxHash(p.tx_hash)}</span>
+  )}
+</td>
+                        <td style={{ ...tdStyle, color: "rgba(255,255,255,0.3)", fontSize: "0.8rem" }}>{formatRelativeTime(p.created_at)}</td>
                       </tr>
                     ))
                   )}

@@ -1,12 +1,218 @@
-// TODO: Landing page — product pitch, how it works, connect middleware CTA
+'use client'
+
+import Link from "next/link";
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-4xl font-bold">CrawlPay</h1>
-      <p className="mt-4 text-muted-foreground">
+    <main style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #1a1a2e 0%, #2d2d3a 50%, #1a1a2e 100%)",
+      color: "white",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      padding: "2rem",
+      fontFamily: "system-ui, sans-serif",
+      position: "relative",
+      overflow: "hidden",
+    }}>
+
+      <div style={{
+        position: "absolute",
+        width: "600px",
+        height: "600px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)",
+        top: "-200px",
+        right: "-200px",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute",
+        width: "400px",
+        height: "400px",
+        borderRadius: "50%",
+        background: "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)",
+        bottom: "-100px",
+        left: "-100px",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ 
+        position: "absolute",
+        top: "1.5rem",
+        left: "1.5rem",
+      }}>
+        <img
+          src="/logo.png"
+          alt="CrawlPay"
+          style={{ width: "48px", height: "48px", borderRadius: "10px" }}
+        />
+      </div>
+
+      <h1 style={{
+        fontSize: "clamp(2.5rem, 6vw, 4rem)",
+        fontWeight: 700,
+        margin: "0 0 1rem 0",
+        textAlign: "center",
+        letterSpacing: "-0.02em",
+        lineHeight: 1.1,
+      }}>
+        CrawlPay
+      </h1>
+
+      <p style={{
+        fontSize: "clamp(1.1rem, 2.5vw, 1.4rem)",
+        color: "rgba(255,255,255,0.6)",
+        margin: "0 0 1.5rem 0",
+        textAlign: "center",
+        maxWidth: "480px",
+        lineHeight: 1.5,
+      }}>
         Monetize your site for the AI era
       </p>
+
+      <p style={{
+        fontSize: "1rem",
+        color: "rgba(255,255,255,0.4)",
+        margin: "0 0 3rem 0",
+        textAlign: "center",
+        maxWidth: "420px",
+        lineHeight: 1.7,
+      }}>
+        AI bots read your site thousands of times a day — for free.
+        One tag. They pay. You earn USDC instantly on Arc.
+      </p>
+
+      <div style={{
+        display: "flex",
+        gap: "1rem",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        marginBottom: "4rem",
+      }}>
+        <Link href="/dashboard" style={{
+          background: "white",
+          color: "#1a1a2e",
+          padding: "0.875rem 2rem",
+          borderRadius: "12px",
+          textDecoration: "none",
+          fontWeight: 600,
+          fontSize: "1rem",
+          display: "inline-block",
+        }}>
+          View Dashboard →
+        </Link>
+
+        <a href="https://github.com/divergenttt/CrawlPay-"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            background: "rgba(255,255,255,0.08)",
+            color: "rgba(255,255,255,0.8)",
+            padding: "0.875rem 2rem",
+            borderRadius: "12px",
+            textDecoration: "none",
+            fontWeight: 500,
+            fontSize: "1rem",
+            border: "1px solid rgba(255,255,255,0.12)",
+            display: "inline-block",
+          }}
+        >
+          GitHub
+        </a>
+      </div>
+
+      <div style={{
+        display: "flex",
+        gap: "3rem",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        marginBottom: "4rem",
+      }}>
+        {[
+          { label: "Payment per crawl", value: "$0.001 USDC" },
+          { label: "Settlement time", value: "< 1 second" },
+          { label: "Gas cost", value: "~$0.000006" },
+        ].map((stat) => (
+          <div key={stat.label} style={{ textAlign: "center" }}>
+            <div style={{
+              fontSize: "1.5rem",
+              fontWeight: 700,
+              marginBottom: "0.25rem",
+            }}>
+              {stat.value}
+            </div>
+            <div style={{
+              fontSize: "0.8rem",
+              color: "rgba(255,255,255,0.4)",
+              textTransform: "uppercase",
+              letterSpacing: "0.08em",
+            }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        display: "flex",
+        gap: "1rem",
+        flexWrap: "wrap",
+        justifyContent: "center",
+        maxWidth: "700px",
+      }}>
+        {[
+          { step: "01", title: "Add one tag", desc: "Paste our script to your site" },
+          { step: "02", title: "Bot visits", desc: "AI crawler requests your page" },
+          { step: "03", title: "Auto payment", desc: "Bot pays $0.001 USDC via Arc" },
+        ].map((item) => (
+          <div key={item.step} style={{
+            background: "rgba(255,255,255,0.04)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "16px",
+            padding: "1.5rem",
+            flex: "1",
+            minWidth: "180px",
+            maxWidth: "220px",
+          }}>
+            <div style={{
+              fontSize: "0.75rem",
+              color: "rgba(255,255,255,0.3)",
+              fontWeight: 600,
+              letterSpacing: "0.1em",
+              marginBottom: "0.5rem",
+            }}>
+              {item.step}
+            </div>
+            <div style={{
+              fontSize: "1rem",
+              fontWeight: 600,
+              marginBottom: "0.4rem",
+            }}>
+              {item.title}
+            </div>
+            <div style={{
+              fontSize: "0.85rem",
+              color: "rgba(255,255,255,0.4)",
+              lineHeight: 1.5,
+            }}>
+              {item.desc}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div style={{
+        position: "absolute",
+        bottom: "2rem",
+        fontSize: "0.75rem",
+        color: "rgba(255,255,255,0.2)",
+      }}>
+        Built on Arc · Powered by Circle Nanopayments
+      </div>
+
     </main>
   );
 }
