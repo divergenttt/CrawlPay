@@ -148,7 +148,7 @@ export default function Home() {
           Add to your site in 2 minutes
         </h2>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 450px)", gap: "1rem", width: "100%", justifyContent: "center", alignItems: "stretch" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1rem", width: "100%", maxWidth: "1150px", margin: "0 auto", alignItems: "stretch" }}>
           {[
             { step: "1", title: "Install", code: INSTALL_CMD },
             { step: "2", title: "Add middleware.ts to your Next.js project", highlighted: true },
