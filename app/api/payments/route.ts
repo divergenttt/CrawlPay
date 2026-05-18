@@ -12,7 +12,7 @@ export async function GET() {
     .from("payments")
     .select("*")
     .order("created_at", { ascending: false })
-    .limit(500);
+    .limit(2000);
 
   console.log("Data count:", data?.length);
   console.log("Error:", error);

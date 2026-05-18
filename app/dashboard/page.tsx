@@ -175,6 +175,7 @@ export default function DashboardPage() {
     try {
       const res = await fetch(`/api/payments?t=${Date.now()}`, {
         cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
       });
       if (!res.ok) {
         console.error("Fetch error:", res.status, res.statusText);
@@ -194,7 +195,7 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const recent = payments.slice(0, 20);
+  const recent = payments.slice(0, 100);
   const totalEarned = payments.reduce((sum, p) => sum + toNumber(p.amount_usdc), 0);
   const totalRequests = payments.length;
   const uniqueBots = new Set(payments.map((p) => p.bot_name)).size;
