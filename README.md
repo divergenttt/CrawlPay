@@ -1,6 +1,6 @@
 # CrawlPay
 
-> Monetize your site for the AI era. AI bots pay $0.001 USDC per page via Arc Nanopayments.
+> AI bots read your site for free. Not anymore.
 
 **Live Demo:** [crawl-pay.vercel.app](https://crawl-pay.vercel.app)  
 **Dashboard:** [crawl-pay.vercel.app/dashboard](https://crawl-pay.vercel.app/dashboard)  
@@ -10,17 +10,23 @@
 
 ## The Problem
 
-AI bots (GPTBot, ClaudeBot, PerplexityBot, GoogleOther) crawl the entire internet — for free. They read your articles, documentation, and content thousands of times per day. Content creators get nothing.
+GPTBot, ClaudeBot, PerplexityBot - they crawl your site thousands of times a day. They read your articles, your docs, your content. And they pay you nothing.
 
-Cloudflare attempted to solve this with Pay Per Crawl — but only for Enterprise customers with Cloudflare Pro. There is no solution for independent developers, bloggers, and small site owners.
+Cloudflare noticed this too. They started testing pay-per-crawl for AI bots - but only for Enterprise customers on Cloudflare Pro. Regular developers, bloggers, indie site owners ? No option.
 
-**Until now.**
+That's what CrawlPay is for.
 
 ---
 
-## The Solution
+## The Idea
 
-CrawlPay is a pay-per-crawl monetization layer for any website. One npm install. AI bots pay $0.001 USDC per page via the x402 protocol on Arc Testnet.
+I was reading the news about Cloudflare testing bot payments and thought: why is this only for Enterprise ? This should be available to anyone with a useful site. Two minutes to set up, no complex infrastructure, no Cloudflare dependency.
+
+So I built it on Arc - where $0.001 micropayments are actually economical.
+
+---
+
+## Install in 2 minutes
 
 ```bash
 npm install github:divergenttt/CrawlPay-SDK
@@ -47,7 +53,7 @@ export const config = {
 }
 ```
 
-That's it. AI bots now pay to access your site.
+That's it. If you have a useful resource and AI bots are reading it - now they pay for it.
 
 ---
 
@@ -59,7 +65,7 @@ That's it. AI bots now pay to access your site.
 | Settlement time | 12 seconds | < 1 second |
 | Viable for $0.001 payments | ❌ | ✅ |
 
-Arc Nanopayments make micro-transactions economically viable for the first time. On Ethereum, gas costs exceed the payment itself. On Arc, gas is 80,000x cheaper.
+On Ethereum, gas costs more than the payment itself - micropayments are dead on arrival. Arc makes $0.001 per crawl actually work. That's the whole reason CrawlPay exists.
 
 ---
 
@@ -86,24 +92,22 @@ Arc Nanopayments make micro-transactions economically viable for the first time.
 
 ---
 
-## Live Demo
+## Live Stats
 
-Dashboard shows real-time payments from simulated AI crawlers on Arc Testnet:
-
-- **200+ transactions** processed on Arc Testnet
+- **1000+ transactions** processed on Arc Testnet
 - **5 unique bot types** detected and charged
-- **Real-time updates** every 5 seconds
+- **Real-time dashboard** updates every 5 seconds
 - **TxHash links** to Arc Testnet Explorer
 
 ---
 
 ## Tech Stack
 
-- **Next.js 14** — App Router, TypeScript
-- **Arc Testnet** — Circle blockchain, USDC native gas token
-- **Circle Nanopayments** — x402 protocol, gas-free batched settlements
-- **Supabase** — real-time payment history
-- **CrawlPay SDK** — open source middleware
+- **Next.js 14** - App Router, TypeScript
+- **Arc Testnet** - Circle blockchain, USDC native gas token
+- **Circle Nanopayments** - x402 protocol, gas-free batched settlements
+- **Supabase** - real-time payment history
+- **CrawlPay SDK** - open source middleware
 
 ---
 
@@ -113,33 +117,35 @@ AI Bot Request
 ↓
 CrawlPay Middleware (SDK)
 ↓
-Bot detected? → HTTP 402 + payment instructions
+Bot detected → HTTP 402 + x402 payment instructions
 ↓
-Bot pays $0.001 USDC via x402
+Bot pays $0.001 USDC via Circle Nanopayments
 ↓
 Page served + payment recorded
 ↓
 Real-time Dashboard
 
+---
+
 ## Roadmap
 
 - [x] Bot detection (11 AI crawlers)
 - [x] HTTP 402 response with x402 headers
+- [x] Circle Nanopayments integration on Arc Testnet
 - [x] Real-time payment dashboard
 - [x] Open source SDK
-- [ ] Revenue split (platform fee)
 - [ ] Arc Mainnet support (Summer 2026)
-- [ ] WordPress / Ghost plugin
+- [ ] Platform fee (5-10% per transaction)
+- [ ] WordPress plugin
 - [ ] Cloudflare Worker version (any site, no Node.js required)
-- [ ] Real x402 payment verification
 
 ---
 
-## Built For
+## Status
 
-Built on Arc Testnet using Circle Nanopayments and x402 protocol.
+Running on Arc Testnet. Arc Nanopayments launched on mainnet in May 2026 - mainnet support is next on the roadmap.
 
-This project demonstrates that pay-per-crawl monetization is technically viable today. The missing piece is AI companies adopting x402 in their crawlers - which Cloudflare is already pushing for.
+Cloudflare is already pushing x402 adoption with OpenAI, Anthropic, and Google. When crawlers support x402 natively, CrawlPay becomes the open alternative for everyone who isn't an Enterprise customer.
 
 ---
 ## Links
