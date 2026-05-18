@@ -26,7 +26,7 @@ async function main() {
   console.log("Starting bot simulation...");
   console.log("Wallet:", client.address);
 
-  for (let i = 0; i < 60; i++) {
+  for (let i = 0; i < 200; i++) {
     const userAgent = USER_AGENTS[i % USER_AGENTS.length];
     const botName = userAgent.split("/")[0];
 
@@ -35,9 +35,9 @@ async function main() {
         method: "GET",
         headers: { "User-Agent": userAgent },
       });
-      console.log(`✅ [${i + 1}/60] Paid $0.001 | Bot: ${botName}`);
+      console.log(`✅ [${i + 1}/200] Paid $0.001 | Bot: ${botName}`);
     } catch (err) {
-      console.log(`❌ [${i + 1}/60] Failed | Bot: ${botName} | ${err}`);
+      console.log(`❌ [${i + 1}/200] Failed | Bot: ${botName} | ${err}`);
     }
 
     await new Promise((r) => setTimeout(r, 500));

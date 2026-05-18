@@ -124,7 +124,7 @@ function formatTxHash(txHash: string | null | undefined): string {
 }
 
 function formatRelativeTime(dateStr: string): string {
-  const diffSec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 1000);
+  const diffSec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 10000);
   if (diffSec < 60) return `${Math.max(diffSec, 1)} sec ago`;
   const diffMin = Math.floor(diffSec / 60);
   if (diffMin < 60) return `${diffMin} min ago`;

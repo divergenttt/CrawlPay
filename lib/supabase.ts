@@ -30,15 +30,19 @@ export const supabase = createClient(
 export async function savePayment(
   payment: Omit<Payment, "id" | "created_at">
 ) {
-  const { data, error } = await supabase
-    .from("payments")
-    .insert([payment])
-    .select();
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from("payments")
+        .insert([payment])
+        .select();
 
-  if (error) {
-    console.error("Supabase error:", error);
-    throw new Error("Failed to save payment: " + error.message);
+      if (error) throw new Error("Supabase error: " + error.message);
+      return data;
+    } catch (err) {
+      console.error(`Attempt ${attempt} failed:`, err);
+      if (attempt === 3) throw err;
+      await new Promise((r) => setTimeout(r, attempt * 500));
+    }
   }
-
-  return data;
 }

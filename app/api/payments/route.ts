@@ -2,25 +2,25 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function GET() {
-  console.log("Payments API called");
-  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log("Service key exists:", !!process.env.SUPABASE_SERVICE_KEY);
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from("payments")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(10000);
 
-  const { data, error } = await supabase
-    .from("payments")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(2000);
+      if (error) throw error;
 
-  console.log("Data count:", data?.length);
-  console.log("Error:", error);
-
-  if (error) {
-    console.error("Payments fetch error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+      return NextResponse.json(data ?? []);
+    } catch (err) {
+      if (attempt === 3) {
+        return NextResponse.json({ error: String(err) }, { status: 500 });
+      }
+      await new Promise((r) => setTimeout(r, attempt * 500));
+    }
   }
-
-  return NextResponse.json(data ?? []);
 }
