@@ -71,11 +71,11 @@ On Ethereum, gas costs more than the payment itself - micropayments are dead on 
 
 ## How It Works
 
-1. **Bot visits your site** — GPTBot, ClaudeBot, PerplexityBot, etc.
-2. **Middleware detects the bot** — by User-Agent header
-3. **Returns HTTP 402 Payment Required** — with x402 payment instructions
-4. **Bot pays $0.001 USDC** — via Circle Nanopayments on Arc
-5. **Page is served** — payment recorded in real-time dashboard
+1. **Bot visits your site** - GPTBot, ClaudeBot, PerplexityBot, etc.
+2. **Middleware detects the bot** - by User-Agent header
+3. **Returns HTTP 402 Payment Required** - with x402 payment instructions
+4. **Bot pays $0.001 USDC** - via Circle Nanopayments on Arc
+5. **Page is served** - payment recorded in real-time dashboard
 
 ---
 
