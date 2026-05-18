@@ -1,18 +1,28 @@
 'use client'
 
 import Link from "next/link";
+import { useState } from "react";
 import type { CSSProperties } from "react";
 
 const INSTALL_CMD = "npm install github:divergenttt/CrawlPay-SDK";
 
-const SYNTAX = {
-  keyword: "#C792EA",
-  string: "#C3E88D",
-  function: "#82AAFF",
-  key: "#F07178",
-  comment: "#546E7A",
-  plain: "#FFFFFF",
-} as const;
+const MIDDLEWARE_CODE = `import { crawlpay } from '@crawlpay/sdk'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const paywall = crawlpay({
+  wallet: "0x_YOUR_WALLET_ADDRESS",
+  price: "$0.001",
+  network: "arcTestnet"
+})
+
+export function middleware(request: NextRequest) {
+  return paywall(request) ?? NextResponse.next()
+}
+
+export const config = {
+  matcher: ['/((?!api|_next|favicon).*)']
+}`;
 
 const codeBlockBase: CSSProperties = {
   background: "#0d0d1a",
@@ -37,27 +47,69 @@ function fn(text: string) { return <span style={{ color: "#82AAFF" }}>{text}</sp
 function objKey(text: string) { return <span style={{ color: "#F07178" }}>{text}</span>; }
 function plain(text: string) { return <span style={{ color: "#FFFFFF" }}>{text}</span>; }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        position: "absolute",
+        top: "0.6rem",
+        right: "0.6rem",
+        background: copied ? "rgba(16,185,129,0.15)" : hovered ? "rgba(255,255,255,0.12)" : "transparent",
+        border: "none",
+        borderRadius: "6px",
+        color: copied ? "#10B981" : "rgba(255,255,255,0.4)",
+        fontSize: "0.85rem",
+        padding: "0.3rem",
+        cursor: "pointer",
+        transition: "all 0.2s",
+        lineHeight: 1,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "28px",
+        height: "28px",
+      }}
+      title="Copy"
+    >
+      {copied ? "✓" : "⎘"}
+    </button>
+  );
+}
+
 function MiddlewareCodeBlock() {
   return (
-    <pre style={middlewareCodeStyle}>
-      {kw("import")}{plain(" { ")}{fn("crawlpay")}{plain(" } from ")}{str("'@crawlpay/sdk'")}{"\n"}
-      {kw("import")}{plain(" { ")}{fn("NextResponse")}{plain(" } from ")}{str("'next/server'")}{"\n"}
-      {kw("import")}{plain(" ")}{kw("type")}{plain(" { ")}{fn("NextRequest")}{plain(" } from ")}{str("'next/server'")}{"\n"}
-      {"\n"}
-      {kw("const")}{plain(" paywall = ")}{fn("crawlpay")}{plain("({")}{"\n"}
-      {plain("  ")}{objKey("wallet")}{plain(": ")}{str('"0x_YOUR_WALLET_ADDRESS"')}{plain(",")}{"\n"}
-      {plain("  ")}{objKey("price")}{plain(": ")}{str('"$0.001"')}{plain(",")}{"\n"}
-      {plain("  ")}{objKey("network")}{plain(": ")}{str('"arcTestnet"')}{"\n"}
-      {plain("})")}{"\n"}
-      {"\n"}
-      {kw("export")}{plain(" ")}{kw("function")}{plain(" ")}{fn("middleware")}{plain("(request: ")}{fn("NextRequest")}{plain(") {")}{"\n"}
-      {plain("  ")}{kw("return")}{plain(" paywall(request) ?? ")}{fn("NextResponse")}{plain(".next()")}{"\n"}
-      {plain("}")}{"\n"}
-      {"\n"}
-      {kw("export")}{plain(" ")}{kw("const")}{plain(" config = {")}{"\n"}
-      {plain("  ")}{objKey("matcher")}{plain(": ")}{str("['/((?!api|_next|favicon).*)']")}{"\n"}
-      {plain("}")}
-    </pre>
+    <div style={{ position: "relative", marginTop: "0.75rem" }}>
+      <pre style={{ ...middlewareCodeStyle, margin: 0, paddingTop: "2.5rem" }}>
+        {kw("import")}{plain(" { ")}{fn("crawlpay")}{plain(" } from ")}{str("'@crawlpay/sdk'")}{"\n"}
+        {kw("import")}{plain(" { ")}{fn("NextResponse")}{plain(" } from ")}{str("'next/server'")}{"\n"}
+        {kw("import")}{plain(" ")}{kw("type")}{plain(" { ")}{fn("NextRequest")}{plain(" } from ")}{str("'next/server'")}{"\n"}
+        {"\n"}
+        {kw("const")}{plain(" paywall = ")}{fn("crawlpay")}{plain("({")}{"\n"}
+        {plain("  ")}{objKey("wallet")}{plain(": ")}{str('"0x_YOUR_WALLET_ADDRESS"')}{plain(",")}{"\n"}
+        {plain("  ")}{objKey("price")}{plain(": ")}{str('"$0.001"')}{plain(",")}{"\n"}
+        {plain("  ")}{objKey("network")}{plain(": ")}{str('"arcTestnet"')}{"\n"}
+        {plain("})")}{"\n"}
+        {"\n"}
+        {kw("export")}{plain(" ")}{kw("function")}{plain(" ")}{fn("middleware")}{plain("(request: ")}{fn("NextRequest")}{plain(") {")}{"\n"}
+        {plain("  ")}{kw("return")}{plain(" paywall(request) ?? ")}{fn("NextResponse")}{plain(".next()")}{"\n"}
+        {plain("}")}{"\n"}
+        {"\n"}
+        {kw("export")}{plain(" ")}{kw("const")}{plain(" config = {")}{"\n"}
+        {plain("  ")}{objKey("matcher")}{plain(": ")}{str("['/((?!api|_next|favicon).*)']")}{"\n"}
+        {plain("}")}
+      </pre>
+      <CopyButton text={MIDDLEWARE_CODE} />
+    </div>
   );
 }
 
@@ -171,7 +223,10 @@ export default function Home() {
               {"highlighted" in item && item.highlighted ? (
                 <MiddlewareCodeBlock />
               ) : "code" in item && item.code ? (
-                <pre style={installCodeStyle}>{item.code}</pre>
+                <div style={{ position: "relative", marginTop: "0.75rem" }}>
+                  <pre style={{ ...installCodeStyle, margin: 0, paddingTop: "2.5rem" }}>{item.code}</pre>
+                  <CopyButton text={item.code} />
+                </div>
               ) : (
                 <div style={{ marginTop: "0.5rem" }}>
                   <p style={{ margin: "0 0 1rem 0", fontSize: "0.95rem", color: "rgba(255,255,255,0.55)", lineHeight: 1.6 }}>
@@ -199,7 +254,6 @@ export default function Home() {
       <div style={{ marginTop: "4rem", fontSize: "0.75rem", color: "rgba(255,255,255,0.2)" }}>
         Built on Arc · Powered by Circle Nanopayments
       </div>
-
     </main>
   );
 }
