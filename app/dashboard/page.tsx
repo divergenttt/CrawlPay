@@ -1,16 +1,9 @@
-'use client'
+"use client";
 
 import { useEffect, useState } from "react";
-import nextDynamic from "next/dynamic";
+import RevenueChart from "@/components/revenue-chart";
 import type { ChartDay, Payment } from "@/lib/types";
 import type { CSSProperties } from "react";
-
-const RevenueChart = nextDynamic(() => import("@/components/revenue-chart"), {
-  ssr: false,
-  loading: () => (
-    <div style={{ height: "300px", background: "rgba(255,255,255,0.03)", borderRadius: "16px" }} />
-  ),
-});
 
 const pageStyle: CSSProperties = {
   minHeight: "100vh",
@@ -52,8 +45,7 @@ const tableContainerStyle: CSSProperties = {
 const titleStyle: CSSProperties = {
   fontSize: "1.875rem",
   fontWeight: 700,
-  marginBottom: 0,
-  marginTop: 0,
+  margin: 0,
   letterSpacing: "-0.02em",
 };
 
@@ -149,13 +141,18 @@ function dateKeyLocal(d: Date): string {
 function buildChartData(payments: Payment[]): ChartDay[] {
   const days: ChartDay[] = [];
   const keys: string[] = [];
+
   for (let i = 6; i >= 0; i--) {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
     d.setDate(d.getDate() - i);
-    days.push({ label: d.toLocaleDateString("en-US", { weekday: "short" }), revenue: 0 });
+    days.push({
+      label: d.toLocaleDateString("en-US", { weekday: "short" }),
+      revenue: 0,
+    });
     keys.push(dateKeyLocal(d));
   }
+
   const revenueByDay = new Map(keys.map((k) => [k, 0]));
   for (const p of payments) {
     const key = dateKeyLocal(new Date(p.created_at));
@@ -163,27 +160,31 @@ function buildChartData(payments: Payment[]): ChartDay[] {
       revenueByDay.set(key, (revenueByDay.get(key) ?? 0) + toNumber(p.amount_usdc));
     }
   }
-  return days.map((day, i) => ({ label: day.label, revenue: revenueByDay.get(keys[i]) ?? 0 }));
+
+  return days.map((day, i) => ({
+    label: day.label,
+    revenue: revenueByDay.get(keys[i]) ?? 0,
+  }));
 }
 
 export default function DashboardPage() {
   const [payments, setPayments] = useState<Payment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   async function fetchData() {
     try {
       const res = await fetch(`/api/payments?t=${Date.now()}`, {
         cache: "no-store",
-        headers: { "Cache-Control": "no-cache" }
       });
+      if (!res.ok) {
+        console.error("Fetch error:", res.status, res.statusText);
+        return;
+      }
       const data = await res.json();
       setPayments(Array.isArray(data) ? data : []);
       setLastUpdated(new Date());
     } catch (err) {
       console.error("Fetch error:", err);
-    } finally {
-      setLoading(false);
     }
   }
 
@@ -197,11 +198,13 @@ export default function DashboardPage() {
   const totalEarned = payments.reduce((sum, p) => sum + toNumber(p.amount_usdc), 0);
   const totalRequests = payments.length;
   const uniqueBots = new Set(payments.map((p) => p.bot_name)).size;
+
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
   const todayEarned = payments
     .filter((p) => new Date(p.created_at) >= todayStart)
     .reduce((sum, p) => sum + toNumber(p.amount_usdc), 0);
+
   const chartData = buildChartData(payments);
 
   const stats = [
@@ -215,107 +218,160 @@ export default function DashboardPage() {
     <main style={pageStyle}>
       <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }`}</style>
 
-      {/* Навигация */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: "2rem",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h1 style={titleStyle}>CrawlPay Dashboard</h1>
-              <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-                <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#10B981", animation: "pulse 2s infinite" }} />
-                <span style={{ fontSize: "0.7rem", color: "#10B981", fontWeight: 600, letterSpacing: "0.05em" }}>LIVE</span>
-              </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: "2rem",
+        }}
+      >
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <h1 style={titleStyle}>CrawlPay Dashboard</h1>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <div
+                style={{
+                  width: "7px",
+                  height: "7px",
+                  borderRadius: "50%",
+                  background: "#10B981",
+                  animation: "pulse 2s infinite",
+                }}
+              />
+              <span
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#10B981",
+                  fontWeight: 600,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                LIVE
+              </span>
             </div>
-            <p style={{ margin: 0, fontSize: "0.8rem", color: "rgba(255,255,255,0.3)", marginTop: "2px" }}>
-              Arc Testnet · {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : "Connecting..."}
-            </p>
           </div>
+          <p
+            style={{
+              margin: 0,
+              marginTop: "2px",
+              fontSize: "0.8rem",
+              color: "rgba(255,255,255,0.3)",
+            }}
+          >
+            Arc Testnet ·{" "}
+            {lastUpdated
+              ? `Updated ${lastUpdated.toLocaleTimeString()}`
+              : "Connecting..."}
+          </p>
         </div>
-        <a href="/" style={{
-          background: "rgba(255,255,255,0.06)",
-          color: "rgba(255,255,255,0.6)",
-          padding: "0.5rem 1rem",
-          borderRadius: "10px",
-          textDecoration: "none",
-          fontSize: "0.85rem",
-          border: "1px solid rgba(255,255,255,0.1)",
-          fontWeight: 500,
-        }}>
+
+        <a
+          href="/"
+          style={{
+            background: "rgba(255,255,255,0.06)",
+            color: "rgba(255,255,255,0.6)",
+            padding: "0.5rem 1rem",
+            borderRadius: "10px",
+            textDecoration: "none",
+            fontSize: "0.85rem",
+            border: "1px solid rgba(255,255,255,0.1)",
+            fontWeight: 500,
+          }}
+        >
           ← Home
         </a>
       </div>
 
-      {loading ? (
-        <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", padding: "6rem", fontSize: "0.9rem" }}>
-          Loading...
-        </div>
-      ) : (
-        <>
-          {/* Карточки */}
-          <div style={gridStyle}>
-            {stats.map((stat) => (
-              <div key={stat.label} style={cardStyle}>
-                <p style={cardLabelStyle}>{stat.label}</p>
-                <p style={cardValueStyle}>{stat.value}</p>
-              </div>
-            ))}
+      <div style={gridStyle}>
+        {stats.map((stat) => (
+          <div key={stat.label} style={cardStyle}>
+            <p style={cardLabelStyle}>{stat.label}</p>
+            <p style={cardValueStyle}>{stat.value}</p>
           </div>
+        ))}
+      </div>
 
-          {/* График */}
-          <section style={sectionStyle}>
-            <h2 style={sectionTitleStyle}>Revenue — last 7 days</h2>
-            <RevenueChart data={chartData} />
-          </section>
+      <section style={sectionStyle}>
+        <h2 style={sectionTitleStyle}>Revenue — last 7 days</h2>
+        <RevenueChart data={chartData} />
+      </section>
 
-          {/* Таблица */}
-          <section style={tableContainerStyle}>
-            <h2 style={sectionTitleStyle}>Recent Payments</h2>
-            <div style={{ overflowX: "auto" }}>
-              <table style={tableStyle}>
-                <thead>
-                  <tr>
-                    <th style={thStyle}>Bot</th>
-                    <th style={thStyle}>Page</th>
-                    <th style={thStyle}>Amount</th>
-                    <th style={thStyle}>TxHash</th>
-                    <th style={thStyle}>Time</th>
+      <section style={tableContainerStyle}>
+        <h2 style={sectionTitleStyle}>Recent Payments</h2>
+        <div style={{ overflowX: "auto" }}>
+          <table style={tableStyle}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Bot</th>
+                <th style={thStyle}>Page</th>
+                <th style={thStyle}>Amount</th>
+                <th style={thStyle}>TxHash</th>
+                <th style={thStyle}>Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recent.length === 0 ? (
+                <tr style={rowStyle}>
+                  <td colSpan={5} style={emptyCellStyle}>
+                    No payments yet. Run simulate-bots.ts to test.
+                  </td>
+                </tr>
+              ) : (
+                recent.map((p) => (
+                  <tr key={p.id} style={rowStyle}>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{p.bot_name}</td>
+                    <td
+                      style={{
+                        ...tdStyle,
+                        color: "rgba(255,255,255,0.4)",
+                        fontFamily: "monospace",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      {p.page_url}
+                    </td>
+                    <td style={{ ...tdStyle, color: "#60A5FA", fontWeight: 500 }}>
+                      {toNumber(p.amount_usdc).toFixed(3)} USDC
+                    </td>
+                    <td
+                      style={{
+                        ...tdStyle,
+                        fontFamily: "monospace",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      {p.tx_hash && p.tx_hash.startsWith("0x") ? (
+                        <a
+                          href={`https://testnet.arcscan.app/tx/${p.tx_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ color: "#60A5FA", textDecoration: "none" }}
+                        >
+                          {formatTxHash(p.tx_hash)}
+                        </a>
+                      ) : (
+                        <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                          {formatTxHash(p.tx_hash)}
+                        </span>
+                      )}
+                    </td>
+                    <td
+                      style={{
+                        ...tdStyle,
+                        color: "rgba(255,255,255,0.3)",
+                        fontSize: "0.8rem",
+                      }}
+                    >
+                      {formatRelativeTime(p.created_at)}
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {recent.length === 0 ? (
-                    <tr style={rowStyle}>
-                      <td colSpan={5} style={emptyCellStyle}>
-                        No payments yet. Run simulate-bots.ts to test.
-                      </td>
-                    </tr>
-                  ) : (
-                    recent.map((p) => (
-                      <tr key={p.id} style={rowStyle}>
-                        <td style={{ ...tdStyle, fontWeight: 600 }}>{p.bot_name}</td>
-                        <td style={{ ...tdStyle, color: "rgba(255,255,255,0.4)", fontFamily: "monospace", fontSize: "0.8rem" }}>{p.page_url}</td>
-                        <td style={{ ...tdStyle, color: "#60A5FA", fontWeight: 500 }}>{toNumber(p.amount_usdc).toFixed(3)} USDC</td>
-                        <td style={{ ...tdStyle, fontFamily: "monospace", fontSize: "0.75rem" }}>
-  {p.tx_hash && p.tx_hash.startsWith("0x") ? (
-    <a href={`https://testnet.arcscan.app/tx/${p.tx_hash}`} target="_blank" rel="noopener noreferrer" style={{ color: "#60A5FA", textDecoration: "none" }}>{formatTxHash(p.tx_hash)}</a>
-  ) : (
-    <span style={{ color: "rgba(255,255,255,0.3)" }}>{formatTxHash(p.tx_hash)}</span>
-  )}
-</td>
-                        <td style={{ ...tdStyle, color: "rgba(255,255,255,0.3)", fontSize: "0.8rem" }}>{formatRelativeTime(p.created_at)}</td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        </>
-      )}
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
     </main>
   );
 }

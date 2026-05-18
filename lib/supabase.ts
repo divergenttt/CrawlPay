@@ -13,8 +13,8 @@ CREATE TABLE payments (
 import { createClient } from "@supabase/supabase-js";
 import type { Payment } from "./types";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY!;
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error(
@@ -22,18 +22,25 @@ if (!supabaseUrl || !supabaseServiceKey) {
   );
 }
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
-);
+const globalForSupabase = globalThis as unknown as {
+  supabase: ReturnType<typeof createClient> | undefined;
+};
+
+export const supabase =
+  globalForSupabase.supabase ??
+  createClient(supabaseUrl, supabaseServiceKey, {
+    global: {
+      fetch: fetch.bind(globalThis),
+    },
+  });
+
+if (process.env.NODE_ENV !== "production") {
+  globalForSupabase.supabase = supabase;
+}
 
 export async function savePayment(
   payment: Omit<Payment, "id" | "created_at">
 ) {
-  console.log("Saving payment:", payment);
-  console.log("Supabase URL:", process.env.NEXT_PUBLIC_SUPABASE_URL);
-  console.log("Service key exists:", !!process.env.SUPABASE_SERVICE_KEY);
-
   const { data, error } = await supabase.from("payments").insert([payment]);
 
   if (error) {
