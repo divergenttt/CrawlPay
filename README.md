@@ -113,17 +113,7 @@ On Ethereum, gas costs more than the payment itself - micropayments are dead on 
 
 ## Architecture
 
-AI Bot Request
-↓
-CrawlPay Middleware (SDK)
-↓
-Bot detected → HTTP 402 + x402 payment instructions
-↓
-Bot pays $0.001 USDC via Circle Nanopayments
-↓
-Page served + payment recorded
-↓
-Real-time Dashboard
+AI Bot Request → CrawlPay Middleware → HTTP 402 + x402 → Bot pays $0.001 USDC → Page served → Dashboard
 
 ---
 
