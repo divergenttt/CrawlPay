@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { PaymentsTable } from "@/components/payments-table";
 import RevenueChart from "@/components/revenue-chart";
 import type { ChartDay, Payment } from "@/lib/types";
 import type { CSSProperties } from "react";
@@ -33,13 +34,6 @@ const sectionStyle: CSSProperties = {
   padding: "1.5rem",
   border: "1px solid rgba(255,255,255,0.08)",
   marginBottom: "1.5rem",
-};
-
-const tableContainerStyle: CSSProperties = {
-  background: "rgba(255,255,255,0.05)",
-  borderRadius: "16px",
-  padding: "1.5rem",
-  border: "1px solid rgba(255,255,255,0.08)",
 };
 
 const titleStyle: CSSProperties = {
@@ -76,39 +70,6 @@ const cardValueStyle: CSSProperties = {
   letterSpacing: "-0.02em",
 };
 
-const tableStyle: CSSProperties = {
-  width: "100%",
-  textAlign: "left",
-  fontSize: "0.875rem",
-  borderCollapse: "collapse",
-};
-
-const thStyle: CSSProperties = {
-  color: "rgba(255,255,255,0.3)",
-  paddingBottom: "0.75rem",
-  fontWeight: 500,
-  textAlign: "left",
-  textTransform: "uppercase",
-  fontSize: "0.7rem",
-  letterSpacing: "0.08em",
-};
-
-const rowStyle: CSSProperties = {
-  borderTop: "1px solid rgba(255,255,255,0.06)",
-};
-
-const tdStyle: CSSProperties = {
-  padding: "0.875rem 0",
-  verticalAlign: "middle",
-};
-
-const emptyCellStyle: CSSProperties = {
-  ...tdStyle,
-  textAlign: "center",
-  color: "rgba(255,255,255,0.3)",
-  padding: "3rem 0",
-};
-
 function toNumber(value: number | string | null | undefined): number {
   if (value == null) return 0;
   return typeof value === "number" ? value : parseFloat(value) || 0;
@@ -116,22 +77,6 @@ function toNumber(value: number | string | null | undefined): number {
 
 function formatUsdc(amount: number): string {
   return `$${amount.toFixed(3)} USDC`;
-}
-
-function formatTxHash(txHash: string | null | undefined): string {
-  if (!txHash || txHash.trim() === "") return "pending";
-  return txHash.length > 8 ? `${txHash.slice(0, 8)}...` : txHash;
-}
-
-function formatRelativeTime(dateStr: string): string {
-  const diffSec = Math.floor((Date.now() - new Date(dateStr).getTime()) / 10000);
-  if (diffSec < 60) return `${Math.max(diffSec, 1)} sec ago`;
-  const diffMin = Math.floor(diffSec / 60);
-  if (diffMin < 60) return `${diffMin} min ago`;
-  const diffHour = Math.floor(diffMin / 60);
-  if (diffHour < 24) return `${diffHour} hour${diffHour === 1 ? "" : "s"} ago`;
-  const diffDay = Math.floor(diffHour / 24);
-  return `${diffDay} day${diffDay === 1 ? "" : "s"} ago`;
 }
 
 function dateKeyLocal(d: Date): string {
@@ -195,7 +140,6 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, []);
 
-  const recent = payments.slice(0, 100);
   const totalEarned = payments.reduce((sum, p) => sum + toNumber(p.amount_usdc), 0);
   const totalRequests = payments.length;
   const uniqueBots = new Set(payments.map((p) => p.bot_name)).size;
@@ -298,80 +242,9 @@ export default function DashboardPage() {
         <RevenueChart data={chartData} />
       </section>
 
-      <section style={tableContainerStyle}>
+      <section style={sectionStyle}>
         <h2 style={sectionTitleStyle}>Recent Payments</h2>
-        <div style={{ overflowX: "auto" }}>
-          <table style={tableStyle}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Bot</th>
-                <th style={thStyle}>Page</th>
-                <th style={thStyle}>Amount</th>
-                <th style={thStyle}>TxHash</th>
-                <th style={thStyle}>Time</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recent.length === 0 ? (
-                <tr style={rowStyle}>
-                  <td colSpan={5} style={emptyCellStyle}>
-                    No payments yet. Run simulate-bots.ts to test.
-                  </td>
-                </tr>
-              ) : (
-                recent.map((p) => (
-                  <tr key={p.id} style={rowStyle}>
-                    <td style={{ ...tdStyle, fontWeight: 600 }}>{p.bot_name}</td>
-                    <td
-                      style={{
-                        ...tdStyle,
-                        color: "rgba(255,255,255,0.4)",
-                        fontFamily: "monospace",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {p.page_url}
-                    </td>
-                    <td style={{ ...tdStyle, color: "#60A5FA", fontWeight: 500 }}>
-                      {toNumber(p.amount_usdc).toFixed(3)} USDC
-                    </td>
-                    <td
-                      style={{
-                        ...tdStyle,
-                        fontFamily: "monospace",
-                        fontSize: "0.75rem",
-                      }}
-                    >
-                      {p.tx_hash && p.tx_hash.startsWith("0x") ? (
-                        <a
-                          href={`https://testnet.arcscan.app/tx/${p.tx_hash}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ color: "#60A5FA", textDecoration: "none" }}
-                        >
-                          {formatTxHash(p.tx_hash)}
-                        </a>
-                      ) : (
-                        <span style={{ color: "rgba(255,255,255,0.3)" }}>
-                          {formatTxHash(p.tx_hash)}
-                        </span>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        ...tdStyle,
-                        color: "rgba(255,255,255,0.3)",
-                        fontSize: "0.8rem",
-                      }}
-                    >
-                      {formatRelativeTime(p.created_at)}
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <PaymentsTable payments={payments} />
       </section>
     </main>
   );
