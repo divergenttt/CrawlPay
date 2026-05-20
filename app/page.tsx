@@ -190,7 +190,7 @@ export default function Home() {
       </p>
 
       <p style={{ fontSize: "1rem", color: "rgba(255,255,255,0.4)", margin: "0 0 3rem 0", textAlign: "center", maxWidth: "420px", lineHeight: 1.7 }}>
-        AI bots read your site thousands of times a day — for free. One tag. They pay. You earn USDC instantly on Arc.
+        AI bots read your site thousands of times a day - for free. One tag. They pay. You earn USDC instantly on Arc.
       </p>
 
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "2rem" }}>
