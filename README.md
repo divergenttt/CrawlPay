@@ -34,13 +34,13 @@ npm install github:divergenttt/CrawlPay-SDK
 
 ```typescript
 // middleware.ts
-import { crawlpay } from '@crawlpay/sdk'
+import { crawlpay } from 'crawlpay-sdk'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const paywall = crawlpay({
   wallet: "0x_YOUR_WALLET_ADDRESS",
-  price: "$0.001",
+  price: "0.001",
   network: "arcTestnet"
 })
 
