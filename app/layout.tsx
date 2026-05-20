@@ -14,8 +14,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" style={{ minHeight: "100%", background: "#1a1a2e" }}>
-      <body className="antialiased" style={{ margin: 0, padding: 0, minHeight: "100%", background: "#1a1a2e" }}>
+    <html
+      lang="en"
+      style={{
+        minHeight: "100%",
+        background: "#1a1a2e",
+        overflowX: "hidden",
+        scrollBehavior: "smooth",
+      }}
+    >
+      <body
+        className="antialiased"
+        style={{
+          margin: 0,
+          padding: 0,
+          minHeight: "100%",
+          background: "#1a1a2e",
+          overflowX: "hidden",
+          scrollBehavior: "smooth",
+          WebkitOverflowScrolling: "touch",
+        }}
+      >
         {children}
       </body>
     </html>

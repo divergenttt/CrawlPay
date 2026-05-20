@@ -34,8 +34,9 @@ const codeBlockBase: CSSProperties = {
   lineHeight: 1.8,
   border: "1px solid rgba(255,255,255,0.08)",
   display: "block",
-  overflowX: "auto",
-  whiteSpace: "pre",
+  overflowX: "hidden",
+  whiteSpace: "pre-wrap",
+  wordBreak: "break-word",
 };
 
 const installCodeStyle: CSSProperties = { ...codeBlockBase, color: "#C3E88D" };
@@ -118,7 +119,10 @@ export default function Home() {
     <main style={{
       minHeight: "100vh",
       width: "100%",
+      maxWidth: "100vw",
       overflowX: "hidden",
+      scrollBehavior: "smooth",
+      WebkitOverflowScrolling: "touch",
       background: "linear-gradient(135deg, #1a1a2e 0%, #2d2d3a 50%, #1a1a2e 100%)",
       backgroundColor: "#1a1a2e",
       color: "white",
@@ -132,16 +136,52 @@ export default function Home() {
       fontFamily: "system-ui, sans-serif",
       position: "relative",
       boxSizing: "border-box",
+      isolation: "isolate",
     }}>
 
-      <div style={{ position: "absolute", width: "600px", height: "600px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)", top: "-200px", right: "-200px", pointerEvents: "none" }} />
-      <div style={{ position: "absolute", width: "400px", height: "400px", borderRadius: "50%", background: "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)", bottom: "-100px", left: "-100px", pointerEvents: "none" }} />
+      <div
+        aria-hidden
+        style={{
+          position: "absolute",
+          inset: 0,
+          overflow: "hidden",
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            width: "min(600px, 90vw)",
+            height: "min(600px, 90vw)",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%)",
+            top: 0,
+            right: 0,
+            transform: "translate(25%, -35%)",
+          }}
+        />
+        <div
+          style={{
+            position: "absolute",
+            width: "min(400px, 70vw)",
+            height: "min(400px, 70vw)",
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(99,102,241,0.05) 0%, transparent 70%)",
+            bottom: 0,
+            left: 0,
+            transform: "translate(-25%, 25%)",
+          }}
+        />
+      </div>
 
-      <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem" }}>
+      <div style={{ position: "absolute", top: "1.5rem", left: "1.5rem", zIndex: 1 }}>
         <img src="/logo.png" alt="CrawlPay" style={{ width: "48px", height: "48px", borderRadius: "10px" }} />
       </div>
 
-      <h1 style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", fontWeight: 700, margin: "0 0 1rem 0", textAlign: "center", letterSpacing: "-0.02em", lineHeight: 1.1 }}>
+      <h1 style={{ fontSize: "clamp(2.5rem, 6vw, 4rem)", fontWeight: 700, margin: "0 0 1rem 0", textAlign: "center", letterSpacing: "-0.02em", lineHeight: 1.1, position: "relative", zIndex: 1, width: "100%", maxWidth: "100%" }}>
         CrawlPay
       </h1>
 
@@ -202,12 +242,12 @@ export default function Home() {
         ))}
       </div>
 
-      <section style={{ width: "100%", maxWidth: "1100px", marginTop: "2rem" }}>
+      <section style={{ width: "100%", maxWidth: "min(1100px, 100%)", marginTop: "2rem", overflowX: "hidden", boxSizing: "border-box", position: "relative", zIndex: 1 }}>
         <h2 style={{ fontSize: "clamp(1.5rem, 3vw, 2rem)", fontWeight: 700, margin: "0 0 2rem 0", textAlign: "center", letterSpacing: "-0.02em" }}>
           Add to your site in 2 minutes
         </h2>
 
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", width: "100%", alignItems: "stretch" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "1rem", width: "100%", maxWidth: "100%", alignItems: "stretch", boxSizing: "border-box", overflowX: "hidden" }}>
           {[
             { step: "1", title: "Install", code: INSTALL_CMD },
             { step: "2", title: "Add middleware.ts to your Next.js project", highlighted: true },
