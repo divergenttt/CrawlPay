@@ -34,7 +34,7 @@ npm install github:divergenttt/CrawlPay-SDK
 
 ```typescript
 // middleware.ts
-import { crawlpay } from 'crawlpay-sdk'
+import { crawlpay } from '@crawlpay/sdk'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 

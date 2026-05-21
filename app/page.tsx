@@ -205,7 +205,7 @@ export default function Home() {
       <div style={{ display: "flex", gap: "2rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "3rem", padding: "1rem 2rem", background: "rgba(255,255,255,0.03)", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.06)" }}>
         {[
           { value: "1000+", label: "Transactions on Arc Testnet" },
-          { value: "5", label: "AI bots supported" },
+          { value: "11", label: "AI bots supported" },
           { value: "MIT", label: "Open source license" },
         ].map((item) => (
           <div key={item.label} style={{ textAlign: "center" }}>
