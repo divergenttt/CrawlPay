@@ -88,7 +88,7 @@ function buildGatewayPaymentRequired(payTo: string): string | null {
       },
       {
         scheme: "exact",
-        network: "eip155:5042002",
+        network: "eip155:5042",
         maxAmountRequired: MAX_AMOUNT_REQUIRED,
         resource: PAGE_RESOURCE,
         description: "CrawlPay: AI bot access fee",
