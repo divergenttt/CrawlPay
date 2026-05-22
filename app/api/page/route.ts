@@ -4,6 +4,10 @@ import { verifyArcSignature } from "@/lib/gateway";
 import { savePayment } from "@/lib/supabase";
 
 const AMOUNT_USDC = 0.001;
+const PAGE_RESOURCE = "https://crawl-pay.vercel.app/api/page";
+/** 0.001 USDC with 6 decimals (atomic units) */
+const MAX_AMOUNT_REQUIRED = "1000";
+const ARC_TESTNET_USDC = "0x3600000000000000000000000000000000000000";
 
 const PAGE_URLS = [
   "/blog/how-ai-works",
@@ -48,6 +52,59 @@ function paymentRequiredBody() {
     network: "arcTestnet",
     wallet: wallet.trim(),
   };
+}
+
+function getUsdcContractAddress(): string | null {
+  const address =
+    process.env.USDC_CONTRACT_ADDRESS?.trim() ||
+    process.env.NEXT_PUBLIC_USDC?.trim() ||
+    ARC_TESTNET_USDC;
+  return address || null;
+}
+
+function buildGatewayPaymentRequired(payTo: string): string | null {
+  const asset = getUsdcContractAddress();
+  if (!asset) {
+    return null;
+  }
+
+  const payload = {
+    version: "x402-v1",
+    accepts: [
+      {
+        scheme: "exact",
+        network: "arcTestnet",
+        maxAmountRequired: MAX_AMOUNT_REQUIRED,
+        resource: PAGE_RESOURCE,
+        description: "CrawlPay: AI bot access fee",
+        mimeType: "application/json",
+        payTo,
+        maxTimeoutSeconds: 60,
+        asset,
+        extra: {
+          name: "USD Coin",
+          decimals: 6,
+        },
+      },
+      {
+        scheme: "exact",
+        network: "eip155:5042002",
+        maxAmountRequired: MAX_AMOUNT_REQUIRED,
+        resource: PAGE_RESOURCE,
+        description: "CrawlPay: AI bot access fee",
+        mimeType: "application/json",
+        payTo,
+        maxTimeoutSeconds: 60,
+        asset: ARC_TESTNET_USDC,
+        extra: {
+          name: "GatewayWalletBatched",
+          decimals: 6,
+        },
+      },
+    ],
+  };
+
+  return Buffer.from(JSON.stringify(payload)).toString("base64");
 }
 
 async function resolvePageUrlForVerification(
@@ -109,15 +166,23 @@ export async function GET(req: NextRequest) {
     }
 
     const page_url = pickPageUrl();
-    const paymentRequiredPayload = Buffer.from(
+    const xPaymentRequired = Buffer.from(
       JSON.stringify({ ...body, page_url })
     ).toString("base64");
+
+    const gatewayPaymentRequired = buildGatewayPaymentRequired(body.wallet);
+    if (!gatewayPaymentRequired) {
+      return NextResponse.json(
+        { error: "USDC_CONTRACT_ADDRESS not configured" },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json(body, {
       status: 402,
       headers: {
-        "X-Payment-Required": paymentRequiredPayload,
-        "PAYMENT-REQUIRED": paymentRequiredPayload,
+        "X-Payment-Required": xPaymentRequired,
+        "PAYMENT-REQUIRED": gatewayPaymentRequired,
       },
     });
   }
