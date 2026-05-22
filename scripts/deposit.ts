@@ -16,8 +16,8 @@ async function main() {
   if (command === "balance") {
     // Use the correct getBalances() method
     const balances = await client.getBalances();
-    console.log("Wallet USDC balance:", balances.wallet.formatted);
-    console.log("Gateway available balance:", balances.gateway.formattedAvailable);
+    console.log("Wallet USDC balance:", Number(balances.wallet.formatted).toFixed(3));
+    console.log("Gateway available balance:", Number(balances.gateway.formattedAvailable).toFixed(3));
 
   } else if (command === "withdraw") {
     const balances = await client.getBalances();

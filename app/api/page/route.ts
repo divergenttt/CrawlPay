@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { pickSimulatedTxHash } from "@/lib/arc-testnet";
 import { getBotName, isAIBot } from "@/lib/bot-detector";
 import { verifyArcSignature } from "@/lib/gateway";
 import { savePayment } from "@/lib/supabase";
@@ -36,6 +35,49 @@ function successResponse(botName: string, tx_hash: string) {
   });
 }
 
+function paymentRequiredBody() {
+  const wallet = process.env.SELLER_ADDRESS;
+  if (!wallet?.trim()) {
+    return null;
+  }
+
+  return {
+    error: "Payment required",
+    amount: "0.001",
+    currency: "USDC",
+    network: "arcTestnet",
+    wallet: wallet.trim(),
+  };
+}
+
+async function resolvePageUrlForVerification(
+  paymentSignature: string,
+  paymentBotAddress: string,
+  pageUrlHint: string | null
+): Promise<string | null> {
+  if (pageUrlHint) {
+    const valid = await verifyArcSignature(
+      paymentSignature,
+      paymentBotAddress,
+      AMOUNT_USDC,
+      pageUrlHint
+    );
+    return valid ? pageUrlHint : null;
+  }
+
+  for (const page_url of PAGE_URLS) {
+    const valid = await verifyArcSignature(
+      paymentSignature,
+      paymentBotAddress,
+      AMOUNT_USDC,
+      page_url
+    );
+    if (valid) return page_url;
+  }
+
+  return null;
+}
+
 export async function GET(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") || "";
 
@@ -44,7 +86,6 @@ export async function GET(req: NextRequest) {
   }
 
   const botName = getBotName(userAgent);
-  const page_url = pickPageUrl();
 
   const paymentSignature = getHeader(
     req,
@@ -56,32 +97,47 @@ export async function GET(req: NextRequest) {
     "payment-bot-address",
     "PAYMENT-BOT-ADDRESS"
   );
-
   const hasCryptoHeaders = Boolean(paymentSignature && paymentBotAddress);
 
-  let tx_hash: string;
-
-  if (hasCryptoHeaders) {
-    const valid = await verifyArcSignature(
-      paymentSignature!,
-      paymentBotAddress!,
-      AMOUNT_USDC,
-      page_url
-    );
-
-    if (!valid) {
+  if (!hasCryptoHeaders) {
+    const body = paymentRequiredBody();
+    if (!body) {
       return NextResponse.json(
-        { error: "Invalid payment signature" },
-        { status: 401 }
+        { error: "SELLER_ADDRESS not configured" },
+        { status: 500 }
       );
     }
 
-    tx_hash = paymentSignature!.startsWith("0x")
-      ? paymentSignature!
-      : `0x${paymentSignature!}`;
-  } else {
-    tx_hash = pickSimulatedTxHash();
+    const page_url = pickPageUrl();
+    const xPaymentRequired = Buffer.from(
+      JSON.stringify({ ...body, page_url })
+    ).toString("base64");
+
+    return NextResponse.json(body, {
+      status: 402,
+      headers: {
+        "X-Payment-Required": xPaymentRequired,
+      },
+    });
   }
+
+  const pageUrlHint = getHeader(req, "payment-page-url", "PAYMENT-PAGE-URL");
+  const page_url = await resolvePageUrlForVerification(
+    paymentSignature!,
+    paymentBotAddress!,
+    pageUrlHint
+  );
+
+  if (!page_url) {
+    return NextResponse.json(
+      { error: "Invalid payment signature" },
+      { status: 401 }
+    );
+  }
+
+  const tx_hash = paymentSignature!.startsWith("0x")
+    ? paymentSignature!
+    : `0x${paymentSignature!}`;
 
   try {
     await savePayment({
