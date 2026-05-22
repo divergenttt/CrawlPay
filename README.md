@@ -94,7 +94,7 @@ On Ethereum, gas costs more than the payment itself - micropayments are dead on 
 
 ## Live Stats
 
-- **1000+ transactions** processed on Arc Testnet
+- **2000+ transactions** processed on Arc Testnet
 - **11 unique bot types** detected and charged
 - **Real-time dashboard** updates every 5 seconds
 - **TxHash links** to Arc Testnet Explorer
