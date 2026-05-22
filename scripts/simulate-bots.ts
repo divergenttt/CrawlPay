@@ -1,3 +1,4 @@
+import { GatewayClient } from "@circle-fin/x402-batching/client";
 import * as dotenv from "dotenv";
 import { privateKeyToAccount } from "viem/accounts";
 
@@ -20,11 +21,7 @@ const USER_AGENTS = [
 ];
 
 type PaymentRequiredPayload = {
-  error?: string;
   amount: string;
-  currency: string;
-  network: string;
-  wallet: string;
   page_url: string;
 };
 
@@ -44,13 +41,7 @@ function decodePaymentRequired(header: string): PaymentRequiredPayload {
     Buffer.from(header, "base64").toString("utf-8")
   ) as PaymentRequiredPayload;
 
-  if (
-    !decoded.amount ||
-    !decoded.currency ||
-    !decoded.network ||
-    !decoded.wallet ||
-    !decoded.page_url
-  ) {
+  if (!decoded.amount || !decoded.page_url) {
     throw new Error("Invalid X-Payment-Required payload");
   }
 
@@ -58,6 +49,7 @@ function decodePaymentRequired(header: string): PaymentRequiredPayload {
 }
 
 async function simulateBotVisit(
+  client: GatewayClient,
   account: ReturnType<typeof privateKeyToAccount>,
   userAgent: string
 ): Promise<void> {
@@ -76,8 +68,16 @@ async function simulateBotVisit(
     throw new Error("Missing X-Payment-Required header in 402 response");
   }
 
-  const payment = decodePaymentRequired(xPaymentRequired);
-  const { amount, currency, network, wallet, page_url } = payment;
+  const { amount, page_url } = decodePaymentRequired(xPaymentRequired);
+
+  const payResult = await client.pay(PAGE_API, {
+    method: "GET",
+    headers,
+  });
+
+  if (payResult.amount === 0n) {
+    throw new Error("Gateway payment was not settled");
+  }
 
   const paymentSignature = await account.signMessage({
     message: buildPaymentMessage(amount, page_url),
@@ -120,9 +120,14 @@ async function main() {
     throw new Error("Missing SELLER_PRIVATE_KEY in .env.local");
   }
 
-  const account = privateKeyToAccount(privateKey as `0x${string}`);
+  const key = privateKey as `0x${string}`;
+  const account = privateKeyToAccount(key);
+  const client = new GatewayClient({
+    chain: "arcTestnet",
+    privateKey: key,
+  });
 
-  console.log("Starting bot simulation (402 → sign → Access granted)...");
+  console.log("Starting bot simulation (402 → Gateway → sign → Access granted)...");
   console.log("Wallet:", account.address);
 
   for (let i = 0; i < 200; i++) {
@@ -130,8 +135,8 @@ async function main() {
     const botName = botLabel(userAgent);
 
     try {
-      await simulateBotVisit(account, userAgent);
-      console.log(`✅ [${i + 1}/200] Paid $0.001 | Bot: ${botName}`);
+      await simulateBotVisit(client, account, userAgent);
+      console.log(`✅ [${i + 1}/200] Paid $0.001 via Gateway | Bot: ${botName}`);
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       console.log(`❌ [${i + 1}/200] Failed | Bot: ${botName} | ${message}`);

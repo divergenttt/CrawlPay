@@ -109,14 +109,15 @@ export async function GET(req: NextRequest) {
     }
 
     const page_url = pickPageUrl();
-    const xPaymentRequired = Buffer.from(
+    const paymentRequiredPayload = Buffer.from(
       JSON.stringify({ ...body, page_url })
     ).toString("base64");
 
     return NextResponse.json(body, {
       status: 402,
       headers: {
-        "X-Payment-Required": xPaymentRequired,
+        "X-Payment-Required": paymentRequiredPayload,
+        "PAYMENT-REQUIRED": paymentRequiredPayload,
       },
     });
   }
