@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { pickSimulatedTxHash } from "@/lib/arc-testnet";
 import { getBotName, isAIBot } from "@/lib/bot-detector";
 import { verifyArcSignature } from "@/lib/gateway";
 import { savePayment } from "@/lib/supabase";
 
 const AMOUNT_USDC = 0.001;
-const PAGE_RESOURCE = "https://crawl-pay.vercel.app/api/page";
-/** 0.001 USDC with 6 decimals (atomic units) */
-const MAX_AMOUNT_REQUIRED = "1000";
-const ARC_TESTNET_USDC = "0x3600000000000000000000000000000000000000";
 
 const PAGE_URLS = [
   "/blog/how-ai-works",
@@ -39,102 +36,6 @@ function successResponse(botName: string, tx_hash: string) {
   });
 }
 
-function paymentRequiredBody() {
-  const wallet = process.env.SELLER_ADDRESS;
-  if (!wallet?.trim()) {
-    return null;
-  }
-
-  return {
-    error: "Payment required",
-    amount: "0.001",
-    currency: "USDC",
-    network: "arcTestnet",
-    wallet: wallet.trim(),
-  };
-}
-
-function getUsdcContractAddress(): string | null {
-  const address =
-    process.env.USDC_CONTRACT_ADDRESS?.trim() ||
-    process.env.NEXT_PUBLIC_USDC?.trim() ||
-    ARC_TESTNET_USDC;
-  return address || null;
-}
-
-function buildGatewayPaymentRequired(payTo: string): string | null {
-  const asset = getUsdcContractAddress();
-  if (!asset) {
-    return null;
-  }
-
-  const payload = {
-    version: "x402-v1",
-    accepts: [
-      {
-        scheme: "exact",
-        network: "arcTestnet",
-        maxAmountRequired: MAX_AMOUNT_REQUIRED,
-        resource: PAGE_RESOURCE,
-        description: "CrawlPay: AI bot access fee",
-        mimeType: "application/json",
-        payTo,
-        maxTimeoutSeconds: 60,
-        asset,
-        extra: {
-          name: "USD Coin",
-          decimals: 6,
-        },
-      },
-      {
-        scheme: "exact",
-        network: "eip155:5042",
-        maxAmountRequired: MAX_AMOUNT_REQUIRED,
-        resource: PAGE_RESOURCE,
-        description: "CrawlPay: AI bot access fee",
-        mimeType: "application/json",
-        payTo,
-        maxTimeoutSeconds: 60,
-        asset: ARC_TESTNET_USDC,
-        extra: {
-          name: "GatewayWalletBatched",
-          decimals: 6,
-        },
-      },
-    ],
-  };
-
-  return Buffer.from(JSON.stringify(payload)).toString("base64");
-}
-
-async function resolvePageUrlForVerification(
-  paymentSignature: string,
-  paymentBotAddress: string,
-  pageUrlHint: string | null
-): Promise<string | null> {
-  if (pageUrlHint) {
-    const valid = await verifyArcSignature(
-      paymentSignature,
-      paymentBotAddress,
-      AMOUNT_USDC,
-      pageUrlHint
-    );
-    return valid ? pageUrlHint : null;
-  }
-
-  for (const page_url of PAGE_URLS) {
-    const valid = await verifyArcSignature(
-      paymentSignature,
-      paymentBotAddress,
-      AMOUNT_USDC,
-      page_url
-    );
-    if (valid) return page_url;
-  }
-
-  return null;
-}
-
 export async function GET(req: NextRequest) {
   const userAgent = req.headers.get("user-agent") || "";
 
@@ -143,6 +44,7 @@ export async function GET(req: NextRequest) {
   }
 
   const botName = getBotName(userAgent);
+  const page_url = pickPageUrl();
 
   const paymentSignature = getHeader(
     req,
@@ -154,56 +56,32 @@ export async function GET(req: NextRequest) {
     "payment-bot-address",
     "PAYMENT-BOT-ADDRESS"
   );
+
   const hasCryptoHeaders = Boolean(paymentSignature && paymentBotAddress);
 
-  if (!hasCryptoHeaders) {
-    const body = paymentRequiredBody();
-    if (!body) {
-      return NextResponse.json(
-        { error: "SELLER_ADDRESS not configured" },
-        { status: 500 }
-      );
-    }
+  let tx_hash: string;
 
-    const page_url = pickPageUrl();
-    const xPaymentRequired = Buffer.from(
-      JSON.stringify({ ...body, page_url })
-    ).toString("base64");
-
-    const gatewayPaymentRequired = buildGatewayPaymentRequired(body.wallet);
-    if (!gatewayPaymentRequired) {
-      return NextResponse.json(
-        { error: "USDC_CONTRACT_ADDRESS not configured" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json(body, {
-      status: 402,
-      headers: {
-        "X-Payment-Required": xPaymentRequired,
-        "PAYMENT-REQUIRED": gatewayPaymentRequired,
-      },
-    });
-  }
-
-  const pageUrlHint = getHeader(req, "payment-page-url", "PAYMENT-PAGE-URL");
-  const page_url = await resolvePageUrlForVerification(
-    paymentSignature!,
-    paymentBotAddress!,
-    pageUrlHint
-  );
-
-  if (!page_url) {
-    return NextResponse.json(
-      { error: "Invalid payment signature" },
-      { status: 401 }
+  if (hasCryptoHeaders) {
+    const valid = await verifyArcSignature(
+      paymentSignature!,
+      paymentBotAddress!,
+      AMOUNT_USDC,
+      page_url
     );
-  }
 
-  const tx_hash = paymentSignature!.startsWith("0x")
-    ? paymentSignature!
-    : `0x${paymentSignature!}`;
+    if (!valid) {
+      return NextResponse.json(
+        { error: "Invalid payment signature" },
+        { status: 401 }
+      );
+    }
+
+    tx_hash = paymentSignature!.startsWith("0x")
+      ? paymentSignature!
+      : `0x${paymentSignature!}`;
+  } else {
+    tx_hash = pickSimulatedTxHash();
+  }
 
   try {
     await savePayment({
