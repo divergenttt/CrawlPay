@@ -6,6 +6,19 @@ import { savePayment } from "@/lib/supabase";
 
 const AMOUNT_USDC = 0.001;
 
+const PAGE_URLS = [
+  "/blog/how-ai-works",
+  "/docs/getting-started",
+  "/articles/machine-learning",
+  "/tutorials/nextjs-guide",
+  "/about",
+  "/",
+];
+
+function pickPageUrl(): string {
+  return PAGE_URLS[Math.floor(Math.random() * PAGE_URLS.length)];
+}
+
 function getHeader(req: NextRequest, ...names: string[]): string | null {
   for (const name of names) {
     const value = req.headers.get(name);
@@ -31,7 +44,7 @@ export async function GET(req: NextRequest) {
   }
 
   const botName = getBotName(userAgent);
-  const page_url = new URL(req.url).pathname || "/";
+  const page_url = pickPageUrl();
 
   const paymentSignature = getHeader(
     req,
