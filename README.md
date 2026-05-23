@@ -119,15 +119,33 @@ AI Bot Request → CrawlPay Middleware → HTTP 402 + x402 → Bot pays $0.001 U
 
 ## Roadmap
 
-- [x] Bot detection (11 AI crawlers)
+###  v1.0 — MVP (Completed)
+- [x] AI bot detection (11 major crawlers: GPTBot, ClaudeBot, PerplexityBot, etc.)
 - [x] HTTP 402 response with x402 headers
-- [x] Circle Nanopayments integration on Arc Testnet
-- [x] Real-time payment dashboard
-- [x] Open source SDK
-- [ ] Arc Mainnet support (Summer 2026)
-- [ ] Platform fee (5-10% per transaction)
-- [ ] WordPress plugin
-- [ ] Cloudflare Worker version (any site, no Node.js required)
+- [x] Open-source Next.js SDK (3-line integration)
+- [x] Circle nanopayments on Arc Testnet
+- [x] Real-time Supabase payment dashboard
+
+###  v1.1 — Stability & Hackathon Ready (In Progress)
+- [ ] Async middleware + fail-open architecture (Edge Runtime safe) 
+- [ ] Replay protection (timestamp + nonce validation)
+- [ ] Idempotent payment recording (zero duplicates)
+- [ ] Graceful degradation modes (`strict` / `log-only` / `cache-fallback`)
+- [ ] Interactive docs + Next.js starter template
+
+###  Q3 2026 — Ecosystem & Adoption
+- [ ] WordPress & Shopify plugins (1-click install)
+- [ ] Cloudflare Workers adapter (deploy anywhere, no Node.js)
+- [ ] First 1,000+ testnet transactions & early adopter feedback
+- [ ] Community Discord + contributor guidelines
+- [ ] Grant applications
+
+###  
+- [ ] Arc Mainnet support + instant USDC settlement
+- [ ] Tiered platform fees (2–7% based on monthly volume)
+- [ ] Enterprise SLA, white-label dashboard & custom pricing
+- [ ] Legal/compliance templates (self-custody, publisher TOS)
+- [ ] AI Agent SDK (native support for LangChain / LlamaIndex / Vercel AI)
 
 ---
 
