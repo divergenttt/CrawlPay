@@ -120,11 +120,11 @@ AI Bot Request → CrawlPay Middleware → HTTP 402 + x402 → Bot pays $0.001 U
 ## Roadmap
 
 ###  v1.0 - MVP (Live)
-- [x] AI bot detection (11 major crawlers: GPTBot, ClaudeBot, PerplexityBot, etc.)
-- [x] HTTP `402` + x402 payment flow
-- [x] Open-source Next.js SDK (3-line integration)
-- [x] Circle nanopayments on Arc Testnet
-- [x] Real-time Supabase payment dashboard
+- ✅ AI bot detection (11 major crawlers: GPTBot, ClaudeBot, PerplexityBot, etc.)
+- ✅ HTTP `402` + x402 payment flow
+- ✅ Open-source Next.js SDK (3-line integration)
+- ✅ Circle nanopayments on Arc Testnet
+- ✅ Real-time Supabase payment dashboard
 
 ###  v1.1 - Hardening (In Progress)
 - [ ] Edge Runtime stability & async middleware
